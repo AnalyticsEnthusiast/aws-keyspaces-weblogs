@@ -6,3 +6,4 @@ web_logs_reject.txt
 test.ipynb
 .ipynb*
 .workspace*
+id_rsa*
