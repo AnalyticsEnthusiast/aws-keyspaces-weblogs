@@ -4,7 +4,7 @@ import configparser
 import time
 
 config = configparser.ConfigParser()
-config.read("aws.cfg")
+config.read("aws-personal.cfg")
 
 STREAM_NAME = config.get("KINESIS", "STREAM_NAME")
 AWS_ACCESS_KEY_K = config.get('KINESIS', 'AWS_ACCESS_KEY')
