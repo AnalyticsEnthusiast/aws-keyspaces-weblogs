@@ -3,6 +3,7 @@ import json
 import configparser
 import time
 import sys
+import argparse
 
 config = configparser.ConfigParser()
 config.read("aws-personal.cfg")
@@ -12,7 +13,7 @@ AWS_ACCESS_KEY_K = config.get('KINESIS', 'AWS_ACCESS_KEY')
 AWS_SECRET_KEY_K = config.get('KINESIS', 'AWS_SECRET_KEY')
 AWS_REGION = config.get("MASTER", "AWS_REGION")
 
-LOG_FILE="data/access_log_sample.txt"
+LOG_FILE="data/access_ordered_sample.log"
 
 
 def shard_summary(stream_name, kinesis_client):
@@ -53,7 +54,7 @@ def create_stream(stream_name, kinesis_client, shard_count=1):
         print("Stream Creation Failed")
         
 
-def generate(stream_name, kinesis_client):
+def generate(stream_name, kinesis_client, delay=1.0):
     
     lines=100
     
@@ -66,7 +67,7 @@ def generate(stream_name, kinesis_client):
             return
         
         while summary['StreamDescriptionSummary']['StreamStatus'] != "ACTIVE":
-            time.sleep(5)
+            time.sleep(delay)
         
     except Exception as e:
         print(e)
@@ -93,18 +94,38 @@ def generate(stream_name, kinesis_client):
 
 if __name__ == '__main__':
     
-    args = [i.upper() for i in sys.argv[1:len(sys.argv)]]
+    
+    parser = argparse.ArgumentParser(
+        prog='producer.py',
+        description='Operations for Kinesis stream',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument('-c', '--create', help='Create Kinesis Stream', action="store_true")
+    parser.add_argument('-d', '--delete', help='Delete Kinesis Stream', action="store_true")
+    parser.add_argument('-s', '--summary', help='Stream details summary', action="store_true")
+    parser.add_argument('-g', '--generate', dest='generate', type=float, help='Frequency of load')
+    
+    args = parser.parse_args(sys.argv[1:])
+    
+    #Validate arguments
+    if args.create and args.delete:
+        sys.exit("Cannot create and delete a kinesis stream at the same time")
+    elif args.create and args.summary:
+        sys.exit("Cannot create and summarise a kinesis stream at the same time")
+    elif args.delete and args.summary:
+        sys.exit("Cannot create and summarise a kinesis stream at the same time")
     
     client = boto3.client('kinesis', aws_access_key_id=AWS_ACCESS_KEY_K, aws_secret_access_key=AWS_SECRET_KEY_K, region_name=AWS_REGION)
     
-    if "CREATE" in args:
+    if args.create:
         create_stream(STREAM_NAME, client)
         
-    elif "DELETE" in args:
+    elif args.delete:
         delete_stream(STREAM_NAME, client)
         
-    if "GENERATE" in args:
-        generate(STREAM_NAME, client)
+    if args.generate is not None:
+        delay = args.generate
+        generate(STREAM_NAME, client, delay)
     
-    if "SUMMARY" in args:
+    if args.summary:
         print(shard_summary(STREAM_NAME, client))
