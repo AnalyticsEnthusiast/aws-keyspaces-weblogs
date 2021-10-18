@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Template to create log data stream'
+
+
+Parameters:
+
+KinesisLogStreamName:
+    Description: Name of Kinesis Data Stream for incoming logs
+    Type: String
+    Default: 'log-data-stream'
+
+KinesisLogStreamShards:
+    Description: Number of shards for the Data Stream
+    Type: Number
+    Default: 1
+    
+KinesisLogStreamRetentionPeriod:
+    Description: Retention period for data in the stream
+    Type: Number
+    Default: 24
+
+S3RawBucketName:
+    Description: This will hold raw data in S3 from the stream
+    Type: String
+    Default: 'log-data-raw-df'
+    
+DynamoDBTableName:
+    Description: Name of DynamoDB table that will hold log data
+    Type: String
+    Default: 'log-data-table'
+
+
+Resources:
+
+    LambdaETL:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: lambda-etl
+            AssumeRolePolicyDocument:
+                Statement:
+                    Effect: Allow
+                    Principal:
+                        Service: lambda.amazonaws.com
+                    Action: sts:AssumeRole
+
+    log-stream:
+        Type: AWS::Kinesis::Stream
+        Properties: 
+            Name: !Ref KinesisLogStreamName
+            RetentionPeriodHours: !Ref KinesisLogStreamRetentionPeriod
+            ShardCount: !Ref KinesisLogStreamShards
+    
+    etl-lambda:
+        Type: AWS::Lambda::Function
+        Properties: 
+          Architectures: x86_64
+            Code: 
+                S3Bucket: 'log-data-code-bucket-df'
+                S3Key: 'etl'
+                ZipFile: String
+        CodeSigningConfigArn: String
+        DeadLetterConfig: 
+            DeadLetterConfig
+        Description: String
+        Environment: 
+            Environment
+        FileSystemConfigs: 
+            - FileSystemConfig
+        FunctionName: String
+        Handler: String
+        ImageConfig: 
+            ImageConfig
+        KmsKeyArn: String
+        Layers: 
+            - String
+        MemorySize: Integer
+        PackageType: String
+        ReservedConcurrentExecutions: Integer
+        Role: String
+        Runtime: String
+        Timeout: Integer
+        TracingConfig: 
+            TracingConfig
+        VpcConfig: 
+            VpcConfig
+
+

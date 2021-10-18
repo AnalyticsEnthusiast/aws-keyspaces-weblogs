@@ -1,0 +1,6 @@
+
+[
+    { "ParameterKey": "KinesisLogStreamName", "ParameterValue": "log-data-stream" },
+    { "ParameterKey": "KinesisLogStreamShards", "ParameterValue": "1" },
+    { "ParameterKey": "KinesisLogStreamRetentionPeriod", "ParameterValue": "24" }
+]

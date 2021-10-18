@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Template to create Kinesis Data Stream'
+
+
+Parameters:
+    KinesisLogStreamName:
+        Description: Name of Kinesis Data Stream for incoming logs
+        Type: String
+        Default: 'log-data-stream'
+
+    KinesisLogStreamShards:
+        Description: Number of shards for the Data Stream
+        Type: Number
+        Default: 1
+
+    KinesisLogStreamRetentionPeriod:
+        Description: Retention period for data in the stream
+        Type: Number
+        Default: 24
+
+
+Resources:
+
+    LogStream:
+        Type: AWS::Kinesis::Stream
+        Properties: 
+            Name: !Ref KinesisLogStreamName
+            RetentionPeriodHours: !Ref KinesisLogStreamRetentionPeriod
+            ShardCount: !Ref KinesisLogStreamShards
